@@ -9,5 +9,7 @@
 
     <bean id="testBean" class="org.summer.test.TestBean">
     	<property name="name">John</property>
+    	<property name="age">20</property>
+    	<property name="heigh">173.3</property>
     </bean>   
 </beans>  

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.summer.bean.convert.ConvertFactory;
+import org.summer.bean.convert.Converter;
 import org.summer.util.StringUtils;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -53,7 +56,7 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 				
 				beans.put(beanName, obj);
 			} catch(Exception e) {
-				
+				e.printStackTrace();
 			}
 		}
 	}
@@ -61,10 +64,32 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 	private void invokeSetters(Map<String, String> properties,
 			Class<?> desiredClass, Object obj) throws NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException {
+		
+		Method[] methods = desiredClass.getMethods();
+		
 		for (String key : properties.keySet()) {
-			Method setter = desiredClass.getMethod(getSetterName(key), new Class[]{String.class});
-			setter.invoke(obj, new Object[]{properties.get(key)});
+			String value = properties.get(key);
+			String setterName = getSetterName(key);
+			
+			for (Method method : methods) {
+				if (method.getName().equals(setterName)) {
+					Type[] types = method.getGenericParameterTypes();
+					Object typedValue = covertToRightType(value, types[0]);
+					
+					if(typedValue != null) {
+						method.invoke(obj, new Object[]{typedValue});
+						break;
+					}
+				}
+			}
+			
 		}
+	}
+
+	private Object covertToRightType(String value, Type type) {
+		Converter converter = ConvertFactory.getConverter(type);
+		if (converter != null) return converter.getValue(value);
+		return null;
 	}
 
 	private Map<String, String> extractProperties(Node bean) {

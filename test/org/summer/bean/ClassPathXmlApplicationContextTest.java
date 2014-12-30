@@ -12,6 +12,8 @@ public class ClassPathXmlApplicationContextTest {
 		ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
 		TestBean testBean = (TestBean)context.getBean("testBean");
 		assertEquals("John", testBean.getName());
+		assertEquals(20, testBean.getAge());
+		assertEquals(173.3, testBean.getHeigh(), 0.001);
 	}
 
 }
