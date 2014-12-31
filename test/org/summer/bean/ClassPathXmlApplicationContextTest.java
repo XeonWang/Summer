@@ -14,6 +14,8 @@ public class ClassPathXmlApplicationContextTest {
 		assertEquals("John", testBean.getName());
 		assertEquals(20, testBean.getAge());
 		assertEquals(173.3, testBean.getHeigh(), 0.001);
+		
+		assertEquals("China", testBean.getAddress().getCountry());
 	}
 
 }

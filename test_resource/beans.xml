@@ -11,5 +11,13 @@
     	<property name="name">John</property>
     	<property name="age">20</property>
     	<property name="heigh">173.3</property>
-    </bean>   
+    	<property name="address">
+    		<ref bean="bj_address"/>
+    	</property>
+    </bean>  
+    <bean id="bj_address" class="org.summer.test.Address">
+    	<property name="country">China</property>
+    	<property name="province">Beijing</property>
+    	<property name="city">Beijing</property>
+    </bean> 
 </beans>  

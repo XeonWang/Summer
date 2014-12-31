@@ -4,6 +4,8 @@ public class TestBean {
 	private String name = "Test Bean";
 	private int age;
 	private double heigh;
+	
+	private Address address;
 
 	public String getName() {
 		return name;
@@ -28,4 +30,13 @@ public class TestBean {
 	public void setHeigh(double heigh) {
 		this.heigh = heigh;
 	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+	
 }

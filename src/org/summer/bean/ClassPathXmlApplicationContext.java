@@ -18,6 +18,7 @@ import org.summer.bean.convert.Converter;
 import org.summer.util.StringUtils;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -46,7 +47,7 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 				String beanName = XmlUtils.getNamedAttribute(bean, "id");
 				String beanClazz = XmlUtils.getNamedAttribute(bean, "class");
 				
-				Map<String, String> properties = extractProperties(bean);
+				Map<String, PropertyValue> properties = extractProperties(bean);
 				
 				Class<?> desiredClass = Class.forName(beanClazz);
 				Constructor<?> constructor = desiredClass.getConstructor(new Class[0]);
@@ -61,47 +62,67 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 		}
 	}
 
-	private void invokeSetters(Map<String, String> properties,
+	private void invokeSetters(Map<String, PropertyValue> properties,
 			Class<?> desiredClass, Object obj) throws NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException {
 		
 		Method[] methods = desiredClass.getMethods();
 		
 		for (String key : properties.keySet()) {
-			String value = properties.get(key);
+			PropertyValue value = properties.get(key);
 			String setterName = getSetterName(key);
 			
 			for (Method method : methods) {
 				if (method.getName().equals(setterName)) {
 					Type[] types = method.getGenericParameterTypes();
-					Object typedValue = covertToRightType(value, types[0]);
-					
-					if(typedValue != null) {
-						method.invoke(obj, new Object[]{typedValue});
-						break;
+					if (value.isSuitableForType(types[0])) {
+						method.invoke(obj, new Object[]{value.rightType(types[0])});
 					}
+				
+//					Object typedValue = covertToRightType(value, types[0]);
+//					
+//					if(typedValue != null) {
+//						method.invoke(obj, new Object[]{typedValue});
+//						break;
+//					}
 				}
 			}
 			
 		}
 	}
 
-	private Object covertToRightType(String value, Type type) {
-		Converter converter = ConvertFactory.getConverter(type);
-		if (converter != null) return converter.getValue(value);
-		return null;
-	}
+//	private Object covertToRightType(PropertyValue value, Type type) {
+////		if(((Class<?>)type).isInstance(value)) return value;
+//		Converter converter = ConvertFactory.getConverter(type);
+//		if (converter != null) return converter.getValue((String)value.);
+//		return null;
+//	}
 
-	private Map<String, String> extractProperties(Node bean) {
-		Map<String, String> properties = new HashMap<String, String>();
+	private Map<String, PropertyValue> extractProperties(Node bean) {
+		Map<String, PropertyValue> properties = new HashMap<String, PropertyValue>();
 		NodeList subNodes = bean.getChildNodes();
 		for (int i = 0; i < subNodes.getLength(); i++) {
 			Node sub = subNodes.item(i);
 			if(sub.getNodeName().equals("property")) {
-				properties.put(XmlUtils.getNamedAttribute(sub, "name"), XmlUtils.getValue(sub));
+				properties.put(XmlUtils.getNamedAttribute(sub, "name"), getPropertyValue(sub));
 			}
 		}
 		return properties;
+	}
+	
+	private PropertyValue getPropertyValue(Node node) {
+		String valueAttr = XmlUtils.getNamedAttribute(node, "value");
+		if (valueAttr != null) return new StringPropertyValue(valueAttr);
+
+		NodeList contentNodes = node.getChildNodes();
+		for (int i = 0; i < contentNodes.getLength(); i++) {
+			Node subOfProperty = contentNodes.item(i);
+			if("ref".equalsIgnoreCase(subOfProperty.getNodeName())) {
+				return new BeanPropertyValue(XmlUtils.getNamedAttribute(subOfProperty, "bean"));
+			}
+		}
+		
+		return new StringPropertyValue(node.getTextContent());
 	}
 
 	private String getSetterName(String key) {
