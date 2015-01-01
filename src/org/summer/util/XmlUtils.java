@@ -14,4 +14,8 @@ public class XmlUtils {
 		Node attr = attrs.getNamedItem(attrName);
 		return attr == null ? null : attr.getNodeValue();
 	}
+	
+	public static String getContent(Node node) {
+		return node.getTextContent();
+	}
 }

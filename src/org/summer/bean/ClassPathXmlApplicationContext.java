@@ -10,30 +10,54 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.summer.bean.parse.Bean;
+import org.summer.util.XmlUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ClassPathXmlApplicationContext extends ApplicationContext {
 
-	private Map<String, Bean> beans = new HashMap<String, Bean>();
+	private Map<String, Bean> configBeans = new HashMap<String, Bean>();
+	
+	private Map<String, Object> beans = new HashMap<String, Object>();
 	
 	public ClassPathXmlApplicationContext(String configurationFileName) {
 		InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(configurationFileName);
 		try {
 			NodeList beanNodes = extractBeanNodes(fileInput);
 			parseConfiguration(beanNodes);
+			
+			createBeans();
+			
+			initBeans();
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		
 	}
 
-	private void parseConfiguration(NodeList configBeans) {
-		for (int i = 0; i < configBeans.getLength(); i++) {
-			String nodeName = configBeans.item(i).getNodeName();
-			if("bean".equalsIgnoreCase(nodeName)) {
-				beans.put(nodeName, new Bean(configBeans.item(i)));
+	private void initBeans() {
+		for(String beanId : configBeans.keySet()) {
+			Object obj = beans.get(beanId);
+			configBeans.get(beanId).initBean(obj, beans);
+		}
+		
+	}
+
+	private void createBeans() {
+		for(String beanId : configBeans.keySet()) {
+			Object obj = configBeans.get(beanId).createBean();
+			beans.put(beanId, obj);
+		}
+	}
+
+	private void parseConfiguration(NodeList beanNodes) {
+		for (int i = 0; i < beanNodes.getLength(); i++) {
+			Node node = beanNodes.item(i);
+			if("bean".equalsIgnoreCase(node.getNodeName())) {
+				configBeans.put(XmlUtils.getNamedAttribute(node, "id"), new Bean(beanNodes.item(i), null));
 			}
 		}
 	}
