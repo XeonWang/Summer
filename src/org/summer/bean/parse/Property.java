@@ -12,8 +12,6 @@ import org.w3c.dom.Node;
 
 public class Property extends BeanConfigItem {
 	
-	private static NodeType[] legalChildTypes = {NodeType.PROPERTY_REF};
-	
 	private Injectable value;
 	private String name;
 	
@@ -24,7 +22,7 @@ public class Property extends BeanConfigItem {
 	
 	@Override
 	protected NodeType[] getLegalChildTypes() {
-		return legalChildTypes;
+		return new NodeType[]{NodeType.PROPERTY_REF};
 	}
 
 	public void setValue(Injectable value) {

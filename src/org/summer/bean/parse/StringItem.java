@@ -21,4 +21,15 @@ public class StringItem implements Injectable {
 		return value;
 	}
 
+	@Override
+	public Class<?> getType(Map<String, Bean> configBeans)
+			throws ClassNotFoundException {
+		return String.class;
+	}
+
+	@Override
+	public Object getValue(Map<String, Bean> configBeans) {
+		return value;
+	}
+
 }

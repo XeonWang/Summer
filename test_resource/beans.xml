@@ -20,4 +20,10 @@
     	<property name="province">Beijing</property>
     	<property name="city">Beijing</property>
     </bean> 
+    
+    <bean id="constructorTest" class="org.summer.test.ConstructorTest">
+    	<constructor-arg>
+    		<value>TestString</value>
+    	</constructor-arg>
+    </bean>
 </beans>  

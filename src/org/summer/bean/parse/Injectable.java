@@ -9,4 +9,8 @@ public interface Injectable {
 
 	Object getRealValue(Map<String, Object> beans);
 
+	Class<?> getType(Map<String, Bean> configBeans) throws ClassNotFoundException;
+
+	Object getValue(Map<String, Bean> configBeans);
+
 }
