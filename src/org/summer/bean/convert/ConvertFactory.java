@@ -11,6 +11,12 @@ public class ConvertFactory {
 	static {
 		primitiveTypeMap.put("int", new IntegerConverter());
 		primitiveTypeMap.put("double", new DoubleConverter());
+		primitiveTypeMap.put("float", new FloatConverter());
+		primitiveTypeMap.put("long", new LongConverter());
+		primitiveTypeMap.put("boolean", new BooleanConverter());
+		primitiveTypeMap.put("char", new CharConverter());
+		primitiveTypeMap.put("short", new ShortConverter());
+		primitiveTypeMap.put("byte", new ByteConverter());
 	}
 	
 	public static Converter getConverter(Type type) {
@@ -25,13 +31,9 @@ public class ConvertFactory {
 			if (Converter.class.isAssignableFrom(converterClass)) {
 				return (Converter)converterClass.newInstance();
 			}
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {
+			//Do nothing, will return null at the end of method.
+		} 
 		return null;
 	}
 }

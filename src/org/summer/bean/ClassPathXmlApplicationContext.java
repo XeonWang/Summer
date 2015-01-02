@@ -19,7 +19,6 @@ import org.xml.sax.SAXException;
 public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private Map<String, Bean> configBeans = new HashMap<String, Bean>();
-	
 	private Map<String, Object> beans = new HashMap<String, Object>();
 	
 	public ClassPathXmlApplicationContext(String configurationFileName) {
@@ -48,7 +47,7 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private void createBeans() {
 		for(String beanId : configBeans.keySet()) {
-			Object obj = configBeans.get(beanId).createBean(configBeans, beans);
+			Object obj = configBeans.get(beanId).createBean(configBeans);
 			beans.put(beanId, obj);
 		}
 	}

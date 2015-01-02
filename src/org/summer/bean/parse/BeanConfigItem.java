@@ -17,6 +17,10 @@ public abstract class BeanConfigItem {
 		this.beanNode = beanNode;
 		this.parent = parent;
 		
+		collectChildren(beanNode);
+	}
+
+	private void collectChildren(Node beanNode) {
 		NodeList childNodes = beanNode.getChildNodes();
 		
 		for (int i = 0; i < childNodes.getLength(); i++) {
@@ -29,14 +33,15 @@ public abstract class BeanConfigItem {
 	}
 	
 	private BeanConfigItem createChild(Node childNode) {
-		for(NodeType type : getLegalChildTypes()) {
-			if(type.getNodeName().equalsIgnoreCase(childNode.getNodeName())) {
+		for (NodeType type : getLegalChildTypes()) {
+			if (type.getNodeName().equalsIgnoreCase(childNode.getNodeName())) {
 				try {
-					Constructor<? extends BeanConfigItem> constructor = type.getType().getConstructor(new Class[]{Node.class, BeanConfigItem.class});
-					return constructor.newInstance(new Object[]{childNode, this});
+					Constructor<? extends BeanConfigItem> constructor = type
+							.getType().getConstructor(new Class[] { Node.class, BeanConfigItem.class });
+					return constructor.newInstance(new Object[] { childNode, this });
 				} catch (Exception e) {
 					e.printStackTrace();
-				} 
+				}
 			}
 		}
 		return null;

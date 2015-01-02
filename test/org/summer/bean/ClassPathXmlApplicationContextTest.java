@@ -31,6 +31,7 @@ public class ClassPathXmlApplicationContextTest {
 	public void testConstructorInject() {
 		ConstructorTest ct = (ConstructorTest)context.getBean("constructorTest");
 		assertEquals("TestString", ct.getTestStr());
+		assertEquals("China", ct.getAddress().getCountry());
 	}
 
 }

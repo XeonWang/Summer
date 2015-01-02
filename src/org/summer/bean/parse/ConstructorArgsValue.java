@@ -17,6 +17,7 @@ public class ConstructorArgsValue extends BeanConfigItem {
 	@Override
 	protected void parse() {
 		super.parse();
-		((ConstructorArgs)getParent()).getArgs().add(new StringItem(XmlUtils.getContent(getBeanNode())));
+		StringItem value = new StringItem(XmlUtils.getContent(getBeanNode()));
+		((ConstructorArgs)getParent()).getArgs().add(value);
 	}
 }

@@ -34,32 +34,37 @@ public class Property extends BeanConfigItem {
 	}
 
 	public void injectTo(Object obj, Map<String, Object> beans) {
-		Method setter = null;
-		try {
-			setter = obj.getClass().getMethod(getSetterName(), value.getRealType(beans));
-			setter.invoke(obj, value.getRealValue(beans));
-		} catch (NoSuchMethodException e) {
-			Method[] allMethod = obj.getClass().getMethods();
-			for (Method method : allMethod) {
-				if (!method.getName().equals(getSetterName())) continue;
-				
-				Class<?>[] parameterTypes = method.getParameterTypes();
-				if (parameterTypes.length == 1) {
-					Converter converter = ConvertFactory.getConverter(parameterTypes[0]);
-					if (converter != null) {
-						try {
-							method.invoke(obj, converter.getValue((String)value.getRealValue(beans)));
-						} catch (IllegalAccessException
-								| IllegalArgumentException
-								| InvocationTargetException e1) {
-							e1.printStackTrace();
-						}
+		if (!setWithTypeMatch(obj, beans)) 
+			setWithConverter(obj, beans);
+	}
+
+	private void setWithConverter(Object obj, Map<String, Object> beans) {
+		Method[] allMethod = obj.getClass().getMethods();
+		for (Method method : allMethod) {
+			if (!method.getName().equals(getSetterName())) continue;
+			
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			if (parameterTypes.length == 1) {
+				Converter converter = ConvertFactory.getConverter(parameterTypes[0]);
+				if (converter != null) {
+					try {
+						method.invoke(obj, converter.getValue((String)value.getRealValue(beans)));
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+	}
+
+	private boolean setWithTypeMatch(Object obj, Map<String, Object> beans) {
+		try {
+			Method setter = obj.getClass().getMethod(getSetterName(), value.getRealType(beans));
+			setter.invoke(obj, value.getRealValue(beans));
+		} catch(Exception e) {
+			return false;
+		}
+		return true;
 	}
 
 	private String getSetterName() {

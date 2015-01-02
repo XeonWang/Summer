@@ -13,8 +13,8 @@ import org.w3c.dom.Node;
 
 public class Bean extends BeanConfigItem {
 	
-	private String beanId;
-	private String beanClass;
+	private String beanId, beanClass;
+	private Object bean = null;
 	
 	public Bean(Node beanNode, BeanConfigItem parent) {
 		super(beanNode, parent);
@@ -27,35 +27,22 @@ public class Bean extends BeanConfigItem {
 		return new NodeType[]{NodeType.BEAN_PROPERTY, NodeType.BEAN_CONSTRUCTOR};
 	}
 
-	public String getBeanId() {
-		return beanId;
-	}
-
-	public String getBeanClass() {
-		return beanClass;
-	}
-
-	public Object createBean(Map<String, Bean> configBeans, Map<String, Object> beans) {
+	public Object createBean(Map<String, Bean> configBeans) {
 		
-		if(beans != null && beans.get(beanId) != null) return beans.get(beanId);
+		if(bean != null) return bean;
 		
 		parse();
 		
-		Object obj = null;
-		Constructor<?> c;
-		
-		obj = createObjectByConstructorConfig(configBeans);
-		if(obj != null) return obj;
-		
-		try {
-			c = Class.forName(beanClass).getConstructor(new Class[]{});
-			obj = c.newInstance(new Object[]{});
-		} catch (NoSuchMethodException e) {
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return obj;
+		bean = createObjectByConstructorConfig(configBeans);
+		if(bean == null) {
+			try {
+				Constructor<?> c = Class.forName(beanClass).getConstructor(new Class[]{});
+				bean = c.newInstance(new Object[]{});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} 
+		return bean;
 	}
 
 	private Object createObjectByConstructorConfig(Map<String, Bean> configBeans) {
@@ -78,6 +65,12 @@ public class Bean extends BeanConfigItem {
 	
 	private Object createObjectByConstructorAndArgs(Constructor<?> c,
 			List<Object> argValues) throws Exception {
+		List<Object> desiredValues = buildDesiredValues(c, argValues);
+		return c.newInstance(desiredValues.toArray());
+	}
+
+	private List<Object> buildDesiredValues(Constructor<?> c,
+			List<Object> argValues) {
 		List<Object> desiredValues = new ArrayList<Object>();
 		Type[] desiredTypes = c.getParameterTypes();
 		for (int i = 0; i < desiredTypes.length; i++) {
@@ -88,7 +81,7 @@ public class Bean extends BeanConfigItem {
 				desiredValues.add(converter.getValue((String)argValues.get(i)));
 			}
 		}
-		return c.newInstance(desiredValues.toArray());
+		return desiredValues;
 	}
 
 	private Constructor<?> findConstructorByArgTypes(List<Class<?>> argTypes) {
@@ -96,26 +89,32 @@ public class Bean extends BeanConfigItem {
 			Constructor<?>[] cons = Class.forName(beanClass).getConstructors();
 			for(Constructor<?> con : cons) {
 				Type[] desiredTypes = con.getParameterTypes();
-				boolean typeMatch = true;
-				for (int i = 0; typeMatch && i < desiredTypes.length; i++) {
-					if(desiredTypes[i] == argTypes.get(i))
-						continue;
-					
-					if(argTypes.get(i) == String.class && ConvertFactory.getConverter(desiredTypes[i]) != null) 
-						continue;
-					
-					typeMatch = false;
-				}
+				
+				if(desiredTypes.length != argTypes.size()) continue;
+				
+				boolean typeMatch = checkEveryArgType(argTypes, desiredTypes);
 				
 				if(typeMatch)
 					return con;
 			}
-		} catch (SecurityException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		} 
 		return null;
+	}
+
+	private boolean checkEveryArgType(List<Class<?>> argTypes,
+			Type[] desiredTypes) {
+		boolean typeMatch = true;
+		for (int i = 0; typeMatch && i < desiredTypes.length; i++) {
+			if(desiredTypes[i] == argTypes.get(i)) continue;
+			
+			boolean existConverter = argTypes.get(i) == String.class && ConvertFactory.getConverter(desiredTypes[i]) != null;
+			if(existConverter) continue;
+			
+			typeMatch = false;
+		}
+		return typeMatch;
 	}
 
 	private List<Class<?>> getArgTypes(List<Injectable> args, Map<String, Bean> configBeans) throws ClassNotFoundException {
@@ -135,12 +134,19 @@ public class Bean extends BeanConfigItem {
 	}
 
 	public void initBean(Object obj, Map<String, Object> beans) {
-		
 		for(BeanConfigItem child : getChildren()) {
 			if(child instanceof Property) {
 				Property property = (Property)child;
 				property.injectTo(obj, beans);
 			}
 		}		
+	}
+
+	public String getBeanId() {
+		return beanId;
+	}
+
+	public String getBeanClass() {
+		return beanClass;
 	}
 }
