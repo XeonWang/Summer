@@ -3,8 +3,8 @@ package org.summer.bean.parse;
 public enum NodeType {
 	
 	BEAN_PROPERTY("property", Property.class), 
-	BEAN_CONSTRUCTOR("constructor-arg", ConstructorArgs.class), 
-	PROPERTY_REF("ref", Reference.class), 
+	BEAN_CONSTRUCTOR("constructor-arg", ConstructorArg.class), 
+	REF("ref", Reference.class), 
 	CONSTRUCTOR_ARGS_VALUE("value", ConstructorArgsValue.class);
 	
 	private String nodeName;

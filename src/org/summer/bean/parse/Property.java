@@ -1,6 +1,5 @@
 package org.summer.bean.parse;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import org.summer.util.StringUtils;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Node;
 
-public class Property extends BeanConfigItem {
+public class Property extends BeanConfigItem implements InjectableContainer {
 	
 	private Injectable value;
 	private String name;
@@ -22,9 +21,10 @@ public class Property extends BeanConfigItem {
 	
 	@Override
 	protected NodeType[] getLegalChildTypes() {
-		return new NodeType[]{NodeType.PROPERTY_REF};
+		return new NodeType[]{NodeType.REF};
 	}
 
+	@Override
 	public void setValue(Injectable value) {
 		this.value = value;
 	}

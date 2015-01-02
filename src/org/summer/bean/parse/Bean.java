@@ -46,19 +46,20 @@ public class Bean extends BeanConfigItem {
 	}
 
 	private Object createObjectByConstructorConfig(Map<String, Bean> configBeans) {
+		List<Injectable> args = new ArrayList<Injectable>();
 		for(BeanConfigItem child : getChildren()) {
-			if(child instanceof ConstructorArgs) {
-				List<Injectable> args = ((ConstructorArgs)child).getArgs();
-				try {
-					List<Class<?>> argTypes = getArgTypes(args, configBeans);
-					List<Object> argValues = getArgValues(args, configBeans);
-					
-					Constructor<?> c = findConstructorByArgTypes(argTypes);
-					return createObjectByConstructorAndArgs(c, argValues);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if(child instanceof ConstructorArg) {
+				args.add(((ConstructorArg)child).getValue());
 			}
+		}
+		try {
+			List<Class<?>> argTypes = getArgTypes(args, configBeans);
+			List<Object> argValues = getArgValues(args, configBeans);
+			
+			Constructor<?> c = findConstructorByArgTypes(argTypes);
+			return createObjectByConstructorAndArgs(c, argValues);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}

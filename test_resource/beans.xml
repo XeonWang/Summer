@@ -19,11 +19,14 @@
     	<property name="country">China</property>
     	<property name="province">Beijing</property>
     	<property name="city">Beijing</property>
-    </bean> 
-    
-    <bean id="constructorTest" class="org.summer.test.ConstructorTest">
-    	<constructor-arg>
-    		<value>TestString</value>
-    	</constructor-arg>
     </bean>
+
+	<bean id="constructorTest" class="org.summer.test.ConstructorTest">
+		<constructor-arg>
+			<value>TestString</value>
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="bj_address" />
+		</constructor-arg>
+	</bean>
 </beans>  

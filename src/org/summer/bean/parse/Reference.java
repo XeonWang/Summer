@@ -20,9 +20,8 @@ public class Reference extends BeanConfigItem {
 	@Override
 	protected void parse() {
 		super.parse();
-		if (getParent() instanceof Property) {
-			Property parent = (Property)getParent();
-			parent.setValue(new ReferenceBean(beanId));
+		if (getParent() instanceof InjectableContainer) {
+			((InjectableContainer)getParent()).setValue(new ReferenceBean(beanId));
 		}
 	}
 }

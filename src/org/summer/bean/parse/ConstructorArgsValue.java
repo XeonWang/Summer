@@ -18,6 +18,6 @@ public class ConstructorArgsValue extends BeanConfigItem {
 	protected void parse() {
 		super.parse();
 		StringItem value = new StringItem(XmlUtils.getContent(getBeanNode()));
-		((ConstructorArgs)getParent()).getArgs().add(value);
+		((ConstructorArg)getParent()).setValue(value);
 	}
 }
