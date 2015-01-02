@@ -1,12 +1,13 @@
 package org.summer.bean.parse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Node;
 
 public class ConstructorArgs extends BeanConfigItem{
 	
-	private List<Injectable> args;
+	private List<Injectable> args = new ArrayList<Injectable>();
 	
 	public ConstructorArgs(Node beanNode, BeanConfigItem parent) {
 		super(beanNode, parent);

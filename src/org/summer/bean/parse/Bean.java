@@ -35,7 +35,12 @@ public class Bean extends BeanConfigItem {
 		return beanClass;
 	}
 
-	public Object createBean(Map<String, Bean> configBeans) {
+	public Object createBean(Map<String, Bean> configBeans, Map<String, Object> beans) {
+		
+		if(beans != null && beans.get(beanId) != null) return beans.get(beanId);
+		
+		parse();
+		
 		Object obj = null;
 		Constructor<?> c;
 		
@@ -130,7 +135,6 @@ public class Bean extends BeanConfigItem {
 	}
 
 	public void initBean(Object obj, Map<String, Object> beans) {
-		parse();
 		
 		for(BeanConfigItem child : getChildren()) {
 			if(child instanceof Property) {

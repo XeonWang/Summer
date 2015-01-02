@@ -48,7 +48,7 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private void createBeans() {
 		for(String beanId : configBeans.keySet()) {
-			Object obj = configBeans.get(beanId).createBean(configBeans);
+			Object obj = configBeans.get(beanId).createBean(configBeans, beans);
 			beans.put(beanId, obj);
 		}
 	}
