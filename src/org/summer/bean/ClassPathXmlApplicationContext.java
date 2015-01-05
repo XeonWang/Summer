@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.summer.bean.parse.Bean;
 import org.summer.bean.parse.BeanConfigItem;
 import org.summer.bean.parse.BeanConllection;
+import org.summer.bean.parse.BeanScope;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -21,7 +22,6 @@ import org.xml.sax.SAXException;
 public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private Map<String, Bean> configBeans = new HashMap<String, Bean>();
-	private Map<String, Object> beans = new HashMap<String, Object>();
 	
 	public ClassPathXmlApplicationContext(String configurationFileName) {
 		InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(configurationFileName);
@@ -41,16 +41,17 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private void initBeans() {
 		for(String beanId : configBeans.keySet()) {
-			Object obj = beans.get(beanId);
-			configBeans.get(beanId).initBean(obj, beans);
+			Bean configBean = configBeans.get(beanId);
+			if(configBean.getScope() == BeanScope.SINGLETON)
+				configBean.initBean(configBeans);
 		}
-		
 	}
 
 	private void createBeans() {
 		for(String beanId : configBeans.keySet()) {
-			Object obj = configBeans.get(beanId).createBean();
-			beans.put(beanId, obj);
+			Bean configBean = configBeans.get(beanId);
+			if(configBean.getScope() == BeanScope.SINGLETON)
+				configBean.createBean();
 		}
 	}
 

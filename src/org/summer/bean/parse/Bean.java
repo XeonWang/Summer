@@ -173,11 +173,11 @@ public class Bean extends BeanConfigItem {
 		return argValues;
 	}
 
-	public void initBean(Object obj, Map<String, Object> beans) {
+	public void initBean(Map<String, Bean> configBeans) {
 		for(BeanConfigItem child : getChildren()) {
 			if(child instanceof Property) {
 				Property property = (Property)child;
-				property.injectTo(obj, beans);
+				property.injectTo(getBean(), configBeans);
 			}
 		}		
 	}
@@ -198,4 +198,9 @@ public class Bean extends BeanConfigItem {
 		if(scope == BeanScope.SINGLETON)
 			this.bean = bean;
 	}
+
+	public BeanScope getScope() {
+		return scope;
+	}
+	
 }

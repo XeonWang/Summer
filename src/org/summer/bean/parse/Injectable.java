@@ -5,9 +5,9 @@ import java.util.Map;
 
 public interface Injectable {
 
-	Class<?> getRealType(Map<String, Object> beans);
+	Class<?> getRealType(Map<String, Bean> configBeans);
 
-	Object getRealValue(Map<String, Object> beans);
+	Object getRealValue(Map<String, Bean> configBeans);
 
 	Class<?> getType(Map<String, Bean> configBeans) throws ClassNotFoundException;
 

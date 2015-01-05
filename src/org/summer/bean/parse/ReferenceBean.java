@@ -16,14 +16,14 @@ public class ReferenceBean implements Injectable {
 	}
 
 	@Override
-	public Class<?> getRealType(Map<String, Object> beans) {
-		Object refBean = beans.get(beanId);
+	public Class<?> getRealType(Map<String, Bean> configBeans) {
+		Object refBean = configBeans.get(beanId).getBean();
 		return refBean.getClass();
 	}
 
 	@Override
-	public Object getRealValue(Map<String, Object> beans) {
-		return beans.get(beanId);
+	public Object getRealValue(Map<String, Bean> configBeans) {
+		return configBeans.get(beanId).getBean();
 	}
 
 	@Override

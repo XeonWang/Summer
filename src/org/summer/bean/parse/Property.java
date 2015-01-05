@@ -33,12 +33,12 @@ public class Property extends BeanConfigItem implements InjectableContainer {
 		return value;
 	}
 
-	public void injectTo(Object obj, Map<String, Object> beans) {
-		if (!setWithTypeMatch(obj, beans)) 
-			setWithConverter(obj, beans);
+	public void injectTo(Object obj, Map<String, Bean> configBeans) {
+		if (!setWithTypeMatch(obj, configBeans)) 
+			setWithConverter(obj, configBeans);
 	}
 
-	private void setWithConverter(Object obj, Map<String, Object> beans) {
+	private void setWithConverter(Object obj, Map<String, Bean> configBeans) {
 		Method[] allMethod = obj.getClass().getMethods();
 		for (Method method : allMethod) {
 			if (!method.getName().equals(getSetterName())) continue;
@@ -48,7 +48,7 @@ public class Property extends BeanConfigItem implements InjectableContainer {
 				Converter converter = ConvertFactory.getConverter(parameterTypes[0]);
 				if (converter != null) {
 					try {
-						method.invoke(obj, converter.getValue((String)value.getRealValue(beans)));
+						method.invoke(obj, converter.getValue((String)value.getRealValue(configBeans)));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -57,10 +57,10 @@ public class Property extends BeanConfigItem implements InjectableContainer {
 		}
 	}
 
-	private boolean setWithTypeMatch(Object obj, Map<String, Object> beans) {
+	private boolean setWithTypeMatch(Object obj, Map<String, Bean> configBeans) {
 		try {
-			Method setter = obj.getClass().getMethod(getSetterName(), value.getRealType(beans));
-			setter.invoke(obj, value.getRealValue(beans));
+			Method setter = obj.getClass().getMethod(getSetterName(), value.getRealType(configBeans));
+			setter.invoke(obj, value.getRealValue(configBeans));
 		} catch(Exception e) {
 			return false;
 		}

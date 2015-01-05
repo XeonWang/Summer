@@ -12,12 +12,12 @@ public class StringItem implements Injectable {
 	}
 
 	@Override
-	public Class<?> getRealType(Map<String, Object> beans) {
+	public Class<?> getRealType(Map<String, Bean> configBeans) {
 		return String.class;
 	}
 
 	@Override
-	public Object getRealValue(Map<String, Object> beans) {
+	public Object getRealValue(Map<String, Bean> configBeans) {
 		return value;
 	}
 
