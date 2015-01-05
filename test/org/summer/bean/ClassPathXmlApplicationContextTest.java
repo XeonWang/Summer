@@ -33,5 +33,12 @@ public class ClassPathXmlApplicationContextTest {
 		assertEquals("TestString", ct.getTestStr());
 		assertEquals("China", ct.getAddress().getCountry());
 	}
+	
+	@Test
+	public void testStaticFactoryMethod() {
+		ConstructorTest ct = (ConstructorTest)context.getBean("staticFactoryMethodTest");
+		assertEquals("TestString", ct.getTestStr());
+		assertEquals("China", ct.getAddress().getCountry());
+	}
 
 }

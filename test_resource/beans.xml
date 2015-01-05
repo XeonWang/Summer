@@ -29,4 +29,14 @@
 			<ref bean="bj_address" />
 		</constructor-arg>
 	</bean>
+
+	<bean id="staticFactoryMethodTest" class="org.summer.test.StaticFactory" factory-method="getInstance">
+		<constructor-arg>
+			<value>TestString</value>
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="bj_address" />
+		</constructor-arg>
+	</bean>
+
 </beans>  

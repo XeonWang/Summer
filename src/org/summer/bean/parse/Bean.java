@@ -1,6 +1,7 @@
 package org.summer.bean.parse;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import org.summer.bean.convert.ConvertFactory;
 import org.summer.bean.convert.Converter;
+import org.summer.util.StringUtils;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Node;
 
@@ -15,11 +17,13 @@ public class Bean extends BeanConfigItem {
 	
 	private String beanId, beanClass;
 	private Object bean = null;
+	private String factoryMethod;
 	
 	public Bean(Node beanNode, BeanConfigItem parent) {
 		super(beanNode, parent);
 		beanId = XmlUtils.getNamedAttribute(beanNode, "id");
 		beanClass = XmlUtils.getNamedAttribute(beanNode, "class");
+		factoryMethod = XmlUtils.getNamedAttribute(beanNode, "factory-method");
 	}
 
 	@Override
@@ -56,24 +60,44 @@ public class Bean extends BeanConfigItem {
 			List<Class<?>> argTypes = getArgTypes(args, configBeans);
 			List<Object> argValues = getArgValues(args, configBeans);
 			
-			Constructor<?> c = findConstructorByArgTypes(argTypes);
-			return createObjectByConstructorAndArgs(c, argValues);
+			InstanceCreator creator = getInstanceCreator(argTypes);
+			return createObjectByConstructorAndArgs(creator, argValues);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	private Object createObjectByConstructorAndArgs(Constructor<?> c,
-			List<Object> argValues) throws Exception {
-		List<Object> desiredValues = buildDesiredValues(c, argValues);
-		return c.newInstance(desiredValues.toArray());
+	private InstanceCreator getInstanceCreator(List<Class<?>> argTypes) {
+		if (StringUtils.isEmpty(factoryMethod)) {
+			Constructor<?> c = findConstructorByArgTypes(argTypes);
+			return InstanceCreator.newInstance(c);
+		} else {
+			Method method = findFactoryMethod(factoryMethod, argTypes.toArray(new Class<?>[0]));
+			return InstanceCreator.newInstance(method, null);
+		}
 	}
 
-	private List<Object> buildDesiredValues(Constructor<?> c,
+	private Method findFactoryMethod(String factoryMethod, Class<?>[] parameterTypes) {
+		try {
+			return Class.forName(beanClass).getMethod(factoryMethod, parameterTypes);
+		} catch (NoSuchMethodException | SecurityException
+				| ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private Object createObjectByConstructorAndArgs(InstanceCreator creator,
+			List<Object> argValues) throws Exception {
+		List<Object> desiredValues = buildDesiredValues(creator, argValues);
+		return creator.getInstance(desiredValues.toArray());
+	}
+
+	private List<Object> buildDesiredValues(InstanceCreator creator,
 			List<Object> argValues) {
 		List<Object> desiredValues = new ArrayList<Object>();
-		Type[] desiredTypes = c.getParameterTypes();
+		Type[] desiredTypes = creator.getParameterTypes();
 		for (int i = 0; i < desiredTypes.length; i++) {
 			if(desiredTypes[i] == argValues.get(i).getClass()) {
 				desiredValues.add(argValues.get(i));
