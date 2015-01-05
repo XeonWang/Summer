@@ -33,7 +33,7 @@ public class ReferenceBean implements Injectable {
 
 	@Override
 	public Object getValue(Map<String, Bean> configBeans) {
-		return configBeans.get(beanId).createBean(configBeans);
+		return configBeans.get(beanId).createBean();
 	}
 
 }

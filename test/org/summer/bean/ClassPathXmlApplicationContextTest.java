@@ -40,5 +40,12 @@ public class ClassPathXmlApplicationContextTest {
 		assertEquals("TestString", ct.getTestStr());
 		assertEquals("China", ct.getAddress().getCountry());
 	}
+	
+	@Test
+	public void testNonStaticFactoryMethod() {
+		ConstructorTest ct = (ConstructorTest)context.getBean("beanFromNonStaticFactory");
+		assertEquals("TestString", ct.getTestStr());
+		assertEquals("China", ct.getAddress().getCountry());
+	}
 
 }

@@ -5,7 +5,8 @@ public enum NodeType {
 	BEAN_PROPERTY("property", Property.class), 
 	BEAN_CONSTRUCTOR("constructor-arg", ConstructorArg.class), 
 	REF("ref", Reference.class), 
-	CONSTRUCTOR_ARGS_VALUE("value", ConstructorArgsValue.class);
+	CONSTRUCTOR_ARGS_VALUE("value", ConstructorArgsValue.class), 
+	BEAN("bean", Bean.class);
 	
 	private String nodeName;
 	private Class<? extends BeanConfigItem> type; 

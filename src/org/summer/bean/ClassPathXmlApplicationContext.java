@@ -10,6 +10,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.summer.bean.parse.Bean;
+import org.summer.bean.parse.BeanConfigItem;
+import org.summer.bean.parse.BeanConllection;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -24,8 +26,8 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 	public ClassPathXmlApplicationContext(String configurationFileName) {
 		InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(configurationFileName);
 		try {
-			NodeList beanNodes = extractBeanNodes(fileInput);
-			parseConfiguration(beanNodes);
+			Node beansNode = extractBeansNode(fileInput);
+			parseConfiguration(beansNode);
 			
 			createBeans();
 			
@@ -47,29 +49,31 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	private void createBeans() {
 		for(String beanId : configBeans.keySet()) {
-			Object obj = configBeans.get(beanId).createBean(configBeans);
+			Object obj = configBeans.get(beanId).createBean();
 			beans.put(beanId, obj);
 		}
 	}
 
-	private void parseConfiguration(NodeList beanNodes) {
+	private void parseConfiguration(Node beansNode) {
+		NodeList beanNodes = beansNode.getChildNodes();
+		BeanConfigItem parent = new BeanConllection(beansNode, configBeans);
+		
 		for (int i = 0; i < beanNodes.getLength(); i++) {
 			Node node = beanNodes.item(i);
 			if("bean".equalsIgnoreCase(node.getNodeName())) {
-				configBeans.put(XmlUtils.getNamedAttribute(node, "id"), new Bean(beanNodes.item(i), null));
+				configBeans.put(XmlUtils.getNamedAttribute(node, "id"), new Bean(beanNodes.item(i), parent));
 			}
 		}
 	}
 
 
-	private NodeList extractBeanNodes(InputStream fileInput)
+	private Node extractBeansNode(InputStream fileInput)
 			throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document document = db.parse(fileInput);
-		NodeList beansNode = document.getChildNodes();
-		NodeList beanNodes = beansNode.item(0).getChildNodes();
-		return beanNodes;
+		Node beansNode = document.getChildNodes().item(0);
+		return beansNode;
 	}
 
 	@Override

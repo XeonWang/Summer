@@ -16,13 +16,16 @@ import org.w3c.dom.Node;
 public class Bean extends BeanConfigItem {
 	
 	private String beanId, beanClass;
-	private Object bean = null;
 	private String factoryMethod;
+	private String factoryClass;
+	
+	private Object bean = null;
 	
 	public Bean(Node beanNode, BeanConfigItem parent) {
 		super(beanNode, parent);
 		beanId = XmlUtils.getNamedAttribute(beanNode, "id");
 		beanClass = XmlUtils.getNamedAttribute(beanNode, "class");
+		factoryClass = XmlUtils.getNamedAttribute(beanNode, "factory-bean");
 		factoryMethod = XmlUtils.getNamedAttribute(beanNode, "factory-method");
 	}
 
@@ -31,25 +34,17 @@ public class Bean extends BeanConfigItem {
 		return new NodeType[]{NodeType.BEAN_PROPERTY, NodeType.BEAN_CONSTRUCTOR};
 	}
 
-	public Object createBean(Map<String, Bean> configBeans) {
+	public Object createBean() {
 		
 		if(bean != null) return bean;
 		
 		parse();
+		bean = createObjectByConstructorConfig();
 		
-		bean = createObjectByConstructorConfig(configBeans);
-		if(bean == null) {
-			try {
-				Constructor<?> c = Class.forName(beanClass).getConstructor(new Class[]{});
-				bean = c.newInstance(new Object[]{});
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} 
 		return bean;
 	}
 
-	private Object createObjectByConstructorConfig(Map<String, Bean> configBeans) {
+	private Object createObjectByConstructorConfig() {
 		List<Injectable> args = new ArrayList<Injectable>();
 		for(BeanConfigItem child : getChildren()) {
 			if(child instanceof ConstructorArg) {
@@ -57,8 +52,8 @@ public class Bean extends BeanConfigItem {
 			}
 		}
 		try {
-			List<Class<?>> argTypes = getArgTypes(args, configBeans);
-			List<Object> argValues = getArgValues(args, configBeans);
+			List<Class<?>> argTypes = getArgTypes(args);
+			List<Object> argValues = getArgValues(args);
 			
 			InstanceCreator creator = getInstanceCreator(argTypes);
 			return createObjectByConstructorAndArgs(creator, argValues);
@@ -74,18 +69,32 @@ public class Bean extends BeanConfigItem {
 			return InstanceCreator.newInstance(c);
 		} else {
 			Method method = findFactoryMethod(factoryMethod, argTypes.toArray(new Class<?>[0]));
-			return InstanceCreator.newInstance(method, null);
+			Object target = getTargetObject();
+			return InstanceCreator.newInstance(method, target);
 		}
+	}
+
+	private Object getTargetObject() {
+		if (StringUtils.isEmpty(factoryClass)) return null;
+		return ((BeanConllection)getParent()).getConfigBeans().get(factoryClass).createBean();
 	}
 
 	private Method findFactoryMethod(String factoryMethod, Class<?>[] parameterTypes) {
 		try {
-			return Class.forName(beanClass).getMethod(factoryMethod, parameterTypes);
+			return getFactoryClass().getMethod(factoryMethod, parameterTypes);
 		} catch (NoSuchMethodException | SecurityException
 				| ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private Class<?> getFactoryClass() throws ClassNotFoundException {
+		if (StringUtils.isEmpty(factoryClass)) {
+			return Class.forName(beanClass);
+		} else { 
+			return Class.forName(((BeanConllection)getParent()).getConfigBeans().get(factoryClass).getBeanClass());
+		}
 	}
 
 	private Object createObjectByConstructorAndArgs(InstanceCreator creator,
@@ -111,7 +120,7 @@ public class Bean extends BeanConfigItem {
 
 	private Constructor<?> findConstructorByArgTypes(List<Class<?>> argTypes) {
 		try {
-			Constructor<?>[] cons = Class.forName(beanClass).getConstructors();
+			Constructor<?>[] cons = getFactoryClass().getConstructors();
 			for(Constructor<?> con : cons) {
 				Type[] desiredTypes = con.getParameterTypes();
 				
@@ -142,18 +151,18 @@ public class Bean extends BeanConfigItem {
 		return typeMatch;
 	}
 
-	private List<Class<?>> getArgTypes(List<Injectable> args, Map<String, Bean> configBeans) throws ClassNotFoundException {
+	private List<Class<?>> getArgTypes(List<Injectable> args) throws ClassNotFoundException {
 		List<Class<?>> argTypes = new ArrayList<Class<?>>();
 		for(Injectable arg : args) {
-			argTypes.add(arg.getType(configBeans));
+			argTypes.add(arg.getType(((BeanConllection)getParent()).getConfigBeans()));
 		}
 		return argTypes;
 	}
 	
-	private List<Object> getArgValues(List<Injectable> args, Map<String, Bean> configBeans) throws ClassNotFoundException {
+	private List<Object> getArgValues(List<Injectable> args) throws ClassNotFoundException {
 		List<Object> argValues = new ArrayList<Object>();
 		for(Injectable arg : args) {
-			argValues.add(arg.getValue(configBeans));
+			argValues.add(arg.getValue(((BeanConllection)getParent()).getConfigBeans()));
 		}
 		return argValues;
 	}
