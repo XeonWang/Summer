@@ -1,6 +1,6 @@
 package org.summer.bean;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +46,20 @@ public class ClassPathXmlApplicationContextTest {
 		ConstructorTest ct = (ConstructorTest)context.getBean("beanFromNonStaticFactory");
 		assertEquals("TestString", ct.getTestStr());
 		assertEquals("China", ct.getAddress().getCountry());
+	}
+	
+	@Test
+	public void testSingletonBean() {
+		TestBean singletonBean1 = (TestBean)context.getBean("singletonBean");
+		TestBean singletonBean2 = (TestBean)context.getBean("singletonBean");
+		assertTrue(singletonBean1 == singletonBean2);
+	}
+	
+	@Test
+	public void testPrototypeBean() {
+		TestBean prototypeBean1 = (TestBean)context.getBean("prototypeBean");
+		TestBean prototypeBean2 = (TestBean)context.getBean("prototypeBean");
+		assertTrue(prototypeBean1 != prototypeBean2);
 	}
 
 }

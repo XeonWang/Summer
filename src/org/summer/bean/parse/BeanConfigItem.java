@@ -12,6 +12,7 @@ public abstract class BeanConfigItem {
 	private Node beanNode;
 	private List<BeanConfigItem> children = new ArrayList<BeanConfigItem>();
 	private BeanConfigItem parent;
+	private boolean parsed;
 	
 	public BeanConfigItem(Node beanNode, BeanConfigItem parent) {
 		this.beanNode = beanNode;
@@ -48,6 +49,8 @@ public abstract class BeanConfigItem {
 	}
 	
 	protected void parse() {
+		if(parsed) return;
+		
 		for (BeanConfigItem child : getChildren())
 			child.parse();
 	}
@@ -62,6 +65,10 @@ public abstract class BeanConfigItem {
 	
 	public BeanConfigItem getParent() {
 		return parent;
+	}
+
+	public void setParsed(boolean parsed) {
+		this.parsed = parsed;
 	}
 
 	protected abstract NodeType[] getLegalChildTypes();

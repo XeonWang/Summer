@@ -78,7 +78,7 @@ public class ClassPathXmlApplicationContext extends ApplicationContext {
 
 	@Override
 	public Object getBean(String beanName) {
-		return beans.get(beanName);
+		return configBeans.get(beanName).createBean();
 	}
 
 }

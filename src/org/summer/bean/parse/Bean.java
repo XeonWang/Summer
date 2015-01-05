@@ -18,6 +18,7 @@ public class Bean extends BeanConfigItem {
 	private String beanId, beanClass;
 	private String factoryMethod;
 	private String factoryClass;
+	private BeanScope scope = BeanScope.SINGLETON;
 	
 	private Object bean = null;
 	
@@ -27,6 +28,10 @@ public class Bean extends BeanConfigItem {
 		beanClass = XmlUtils.getNamedAttribute(beanNode, "class");
 		factoryClass = XmlUtils.getNamedAttribute(beanNode, "factory-bean");
 		factoryMethod = XmlUtils.getNamedAttribute(beanNode, "factory-method");
+		String beanScope = XmlUtils.getNamedAttribute(beanNode, "scope");
+		if (BeanScope.PROTOTYPE.name().equalsIgnoreCase(beanScope)) {
+			scope = BeanScope.PROTOTYPE;
+		}
 	}
 
 	@Override
@@ -35,13 +40,14 @@ public class Bean extends BeanConfigItem {
 	}
 
 	public Object createBean() {
-		
-		if(bean != null) return bean;
+		Object tempBean;
+		if(getBean() != null) return getBean();
 		
 		parse();
-		bean = createObjectByConstructorConfig();
+		tempBean = createObjectByConstructorConfig();
+		setBean(tempBean);
 		
-		return bean;
+		return tempBean;
 	}
 
 	private Object createObjectByConstructorConfig() {
@@ -182,5 +188,14 @@ public class Bean extends BeanConfigItem {
 
 	public String getBeanClass() {
 		return beanClass;
+	}
+
+	public Object getBean() {
+		return bean;
+	}
+
+	public void setBean(Object bean) {
+		if(scope == BeanScope.SINGLETON)
+			this.bean = bean;
 	}
 }

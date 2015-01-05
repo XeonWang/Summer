@@ -49,5 +49,23 @@
 			<ref bean="bj_address" />
 		</constructor-arg>
 	</bean>
+	
+    <bean id="singletonBean" class="org.summer.test.TestBean">
+    	<property name="name">John</property>
+    	<property name="age">20</property>
+    	<property name="heigh">173.3</property>
+    	<property name="address">
+    		<ref bean="bj_address"/>
+    	</property>
+    </bean>
+    
+    <bean id="prototypeBean" class="org.summer.test.TestBean" scope="prototype">
+    	<property name="name">John</property>
+    	<property name="age">20</property>
+    	<property name="heigh">173.3</property>
+    	<property name="address">
+    		<ref bean="bj_address"/>
+    	</property>
+    </bean>
 
 </beans>  
