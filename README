@@ -1,0 +1,23 @@
+Features:
+
+Bean create. Example: <bean id="testBean" class="com.xxx.testBean"></bean>
+
+Bean property inject. Example: <bean id="testBean" class="com.xxx.testBean">
+									<property name="age">30</property>
+									<property name="address">
+										<ref bean="address"/>
+									</property>
+								</bean>
+					
+Bean constructor inject. Example: <bean id="testBean" class="com.xxx.testBean">
+									<constructor-arg>30</constructor-arg>
+									<constructor-arg>
+										<ref bean="address"/>
+									</constructor-arg>
+								  </bean>
+								
+Static factory method. Example: <bean id="testBean" class="..." factory-method="getInstance">...</bean>
+
+Nonstatic factory method. Example: <bean id="testBean" class="..." factory-bean="dep" factory-method="getInstance">...</bean>
+
+Init method. Example: <bean id="testBean" class="..." init-method="initMethod">...</bean>
