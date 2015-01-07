@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.summer.test.ConstructorTest;
 import org.summer.test.TestBean;
+import org.summer.test.TestBeanForInitMethod;
 
 public class ClassPathXmlApplicationContextTest {
 	
@@ -60,6 +61,12 @@ public class ClassPathXmlApplicationContextTest {
 		TestBean prototypeBean1 = (TestBean)context.getBean("prototypeBean");
 		TestBean prototypeBean2 = (TestBean)context.getBean("prototypeBean");
 		assertTrue(prototypeBean1 != prototypeBean2);
+	}
+	
+	@Test
+	public void testInitMethod() {
+		TestBeanForInitMethod bean = (TestBeanForInitMethod)context.getBean("testBeanForInitMethod");
+		assertEquals("Success", bean.getTestStr());
 	}
 
 }

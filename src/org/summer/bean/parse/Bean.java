@@ -9,29 +9,38 @@ import java.util.Map;
 
 import org.summer.bean.convert.ConvertFactory;
 import org.summer.bean.convert.Converter;
+import org.summer.bean.lifecycle.DeclaredInitMethodListener;
+import org.summer.bean.lifecycle.InjectedState;
+import org.summer.bean.lifecycle.LifeCycleStateChange;
+import org.summer.bean.lifecycle.StateChangeListener;
 import org.summer.util.StringUtils;
 import org.summer.util.XmlUtils;
 import org.w3c.dom.Node;
 
 public class Bean extends BeanConfigItem {
 	
-	private String beanId, beanClass;
+	private String beanId, beanClass, initMethodName;
 	private String factoryMethod;
 	private String factoryClass;
 	private BeanScope scope = BeanScope.SINGLETON;
 	
 	private Object bean = null;
 	
+	private List<StateChangeListener> stateChangeListeners = new ArrayList<StateChangeListener>();
+	
 	public Bean(Node beanNode, BeanConfigItem parent) {
 		super(beanNode, parent);
 		beanId = XmlUtils.getNamedAttribute(beanNode, "id");
 		beanClass = XmlUtils.getNamedAttribute(beanNode, "class");
+		initMethodName = XmlUtils.getNamedAttribute(beanNode, "init-method");
 		factoryClass = XmlUtils.getNamedAttribute(beanNode, "factory-bean");
 		factoryMethod = XmlUtils.getNamedAttribute(beanNode, "factory-method");
 		String beanScope = XmlUtils.getNamedAttribute(beanNode, "scope");
 		if (BeanScope.PROTOTYPE.name().equalsIgnoreCase(beanScope)) {
 			scope = BeanScope.PROTOTYPE;
 		}
+		
+		initStateChangeListeners();
 	}
 
 	@Override
@@ -179,7 +188,19 @@ public class Bean extends BeanConfigItem {
 				Property property = (Property)child;
 				property.injectTo(getBean(), configBeans);
 			}
-		}		
+		}
+		
+		publisStateChangeEvent(new InjectedState(this));
+	}
+	
+	private void initStateChangeListeners() {
+		stateChangeListeners.add(new DeclaredInitMethodListener());
+	}
+	
+	private void publisStateChangeEvent(LifeCycleStateChange event) {
+		for(StateChangeListener listener : stateChangeListeners) {
+			listener.process(event);
+		}
 	}
 
 	public String getBeanId() {
@@ -201,6 +222,10 @@ public class Bean extends BeanConfigItem {
 
 	public BeanScope getScope() {
 		return scope;
+	}
+
+	public String getInitMethodName() {
+		return initMethodName;
 	}
 	
 }

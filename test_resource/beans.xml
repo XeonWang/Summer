@@ -68,4 +68,5 @@
     	</property>
     </bean>
 
+    <bean id="testBeanForInitMethod" class="org.summer.test.TestBeanForInitMethod" init-method="initMethod"></bean> 
 </beans>  
