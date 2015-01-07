@@ -183,6 +183,7 @@ public class Bean extends BeanConfigItem {
 	}
 
 	public void initBean(Map<String, Bean> configBeans) {
+		
 		for(BeanConfigItem child : getChildren()) {
 			if(child instanceof Property) {
 				Property property = (Property)child;

@@ -60,6 +60,7 @@ public class ClassPathXmlApplicationContextTest {
 	public void testPrototypeBean() {
 		TestBean prototypeBean1 = (TestBean)context.getBean("prototypeBean");
 		TestBean prototypeBean2 = (TestBean)context.getBean("prototypeBean");
+		assertEquals("China", prototypeBean1.getAddress().getCountry());
 		assertTrue(prototypeBean1 != prototypeBean2);
 	}
 	
